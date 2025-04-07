@@ -1,0 +1,42 @@
+// Generated code - do not edit manually!
+
+package {{.PackageName}}
+
+import (
+	_ "embed"
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
+
+{{range .Assets}}
+//go:embed {{.Path}}
+var {{.Name}} []byte
+{{- end}}
+
+type Assets struct {
+{{- range .Assets}}
+	{{.Name}} rl.Texture2D
+{{- end}}
+}
+
+func NewAssets() Assets {
+	a := Assets{}
+
+{{- range .Assets}}
+	a.{{.Name}} = loadTexture({{.Name}}, "{{.Ext}}")
+{{- end}}
+
+	return a
+}
+
+func (a *Assets) Close() {
+{{- range .Assets}}
+	rl.UnloadTexture(a.{{.Name}})
+{{- end}}
+}
+
+func loadTexture(image []byte, ext string) rl.Texture2D {
+	img := rl.LoadImageFromMemory(ext, image, int32(len(image)))
+	defer rl.UnloadImage(img)
+
+	return rl.LoadTextureFromImage(img)
+}
